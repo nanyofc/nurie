@@ -2,36 +2,168 @@
 <html lang="ja">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>お花のぬりえ</title>
+<title>えらべるぬりえ</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f7f4ee;color:#293d39;font-family:system-ui,-apple-system,sans-serif}header{max-width:1200px;margin:auto;padding:22px 24px 12px}h1{margin:0 0 8px;font-size:clamp(24px,4vw,36px)}p{margin:6px 0;font-size:20px}main{max-width:1200px;margin:auto;display:grid;grid-template-columns:1fr 260px;gap:20px;padding:12px 24px 24px}.paper{background:white;border:2px solid #dedbd3;border-radius:24px;overflow:hidden}svg{display:block;width:100%;max-height:70vh;min-height:360px;touch-action:manipulation}.part{stroke:#35443e;stroke-width:4;stroke-linejoin:round;cursor:pointer;outline:none}.part:focus-visible{stroke:#154cfa;stroke-width:7}aside{background:#fff;border-radius:24px;padding:18px}h2{font-size:22px;margin:0 0 14px}.palette{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.swatch{min-height:60px;border:3px solid #b4b4b4;border-radius:15px;position:relative;cursor:pointer}.swatch[aria-pressed=true]{outline:4px solid #233c34;outline-offset:3px}.swatch[aria-pressed=true]:after{content:'✓';position:absolute;inset:0;display:grid;place-items:center;color:#111;font-size:30px;text-shadow:0 0 4px white,0 0 4px white}button{font:inherit;touch-action:manipulation}button:focus-visible{outline:4px solid #154cfa;outline-offset:3px}.action{display:block;width:100%;padding:14px 8px;min-height:58px;margin-top:14px;border:2px solid #c1cec7;border-radius:14px;background:#eef4ef;color:#293d39;font-size:20px;font-weight:700;cursor:pointer}.action:disabled{opacity:.45;cursor:default}#status{font-size:16px;min-height:48px;margin-top:16px}dialog{border:0;border-radius:20px;padding:26px;max-width:90vw}dialog::backdrop{background:#0007}.dialog-buttons{display:flex;gap:16px}.dialog-buttons button{min-width:120px}footer{text-align:center;padding:0 20px 20px;color:#53635c}@media(max-width:750px){main{grid-template-columns:1fr;padding:10px 14px;gap:12px}header{padding:16px 16px 6px}aside{padding:16px}.palette{grid-template-columns:repeat(6,1fr);gap:10px}.swatch{min-height:52px}.actions{display:flex;gap:10px}.action{font-size:17px}svg{min-height:300px;max-height:56vh}h2{font-size:20px}p{font-size:18px}}@media print{header,aside,footer{display:none}main{display:block;padding:0}.paper{border:none}svg{max-height:none;height:90vh}}
-</style>
-<header><h1>お花のぬりえ</h1><p>① 色をえらぶ　② ぬりたいところを押す</p></header>
-<main><section class="paper" aria-label="花びらを一枚ずつ塗れるお花"><svg id="art" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 720" aria-label="お花のぬりえ"><g id="parts"></g></svg></section>
-<aside><h2 id="colorLabel">いまの色：あか</h2><div class="palette" id="palette" aria-label="色をえらぶ"></div><div class="actions"><button class="action" id="undo" disabled>ひとつ戻す</button><button class="action" id="save">作品を保存</button><button class="action" id="reset">はじめから</button></div><p id="status" role="status" aria-live="polite">花びらは1枚ずつ、好きな色にできます。</p></aside></main>
+.gallery{max-width:1200px;margin:auto;padding:8px 24px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.choice{background:white;border:2px solid #ccd5cc;border-radius:16px;padding:12px;font-size:20px;cursor:pointer;min-height:70px}.choice[aria-pressed=true]{border:4px solid #345c47;background:#edf4e9}.choice svg{height:70px;min-height:0;max-height:70px;pointer-events:none}.choice span{display:block;margin-top:6px}@media(max-width:600px){.gallery{grid-template-columns:repeat(2,1fr);padding:8px 14px}.choice svg{height:65px;max-height:65px}}@media print{.gallery{display:none}}details{max-width:1200px;margin:auto}summary{margin:8px 24px;padding:16px;background:#e4ede2;border-radius:12px;font-size:22px;font-weight:700;cursor:pointer;min-height:60px}@media print{details{display:none}}.zoomtools{display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;padding:10px}.zoomtools button{min-width:64px;min-height:52px;border:2px solid #bac8bb;border-radius:12px;background:#f4f6f1;font-size:20px;font-weight:700;color:#293d39}.zoomtools[hidden]{display:none}@media print{.zoomtools{display:none}}</style>
+<header><h1>えらべるぬりえ</h1><p>① 色をえらぶ　② ぬりたいところを押す</p></header>
+<details id="picker" open><summary>絵をえらぶ（22種類）</summary><nav class="gallery" id="gallery" aria-label="絵柄をえらぶ"></nav></details><main><section class="paper" aria-label="花びらを一枚ずつ塗れるお花"><svg id="art" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 720" aria-label="えらべるぬりえ"><g id="parts"></g></svg><div class="zoomtools" aria-label="絵の拡大"><button id="zoomIn" type="button">＋ 拡大</button><button id="zoomOut" type="button">− 縮小</button><button id="zoomReset" type="button">全体</button><span id="zoomLevel">100%</span></div><div class="zoomtools" id="pan" hidden><button data-pan="-1,0" aria-label="左を見る">←</button><button data-pan="0,-1" aria-label="上を見る">↑</button><button data-pan="0,1" aria-label="下を見る">↓</button><button data-pan="1,0" aria-label="右を見る">→</button></div></section>
+<aside><h2 id="colorLabel">いまの色：あか</h2><div class="palette" id="palette" aria-label="色をえらぶ"></div><div class="actions"><button class="action" id="undo" disabled>ひとつ戻す</button><button class="action" id="save">作品を保存</button><button class="action" id="reset">はじめから</button></div><p id="status" role="status" aria-live="polite">22種類の絵から選べます。</p></aside></main>
 <footer>途中でもお休みできます。続きは同じ端末・同じブラウザで。</footer>
-<dialog id="confirm"><h2>全部の色を白にもどしますか？</h2><p>「ひとつ戻す」で元に戻せます。</p><div class="dialog-buttons"><button class="action" id="cancel">やめる</button><button class="action" id="clear">白にもどす</button></div></dialog>
+<dialog id="confirm"><h2>この絵の色を白にもどしますか？</h2><p>「ひとつ戻す」で元に戻せます。</p><div class="dialog-buttons"><button class="action" id="cancel">やめる</button><button class="action" id="clear">白にもどす</button></div></dialog>
 <script>
 'use strict';
+let current='flower';
 const NS='http://www.w3.org/2000/svg',KEY='digital-nurie-flower-v1';
-const colors=[['あか','#ef6865'],['オレンジ','#f6a34c'],['きいろ','#f5d94e'],['きみどり','#add16a'],['みどり','#56a875'],['みずいろ','#83cee7'],['あお','#6c9cdb'],['むらさき','#ae8ad0'],['ピンク','#efa9c6'],['ちゃいろ','#af8261'],['グレー','#acb3bb'],['しろ','#ffffff']];
+const colors=[['あか','#ef6865'],['オレンジ','#f6a34c'],['きいろ','#f5d94e'],['きみどり','#add16a'],['みどり','#56a875'],['みずいろ','#83cee7'],['あお','#6c9cdb'],['むらさき','#ae8ad0'],['ピンク','#efa9c6'],['ちゃいろ','#af8261'],['グレー','#acb3bb'],['しろ','#ffffff'],['えんじ','#a83f57'],['こいオレンジ','#da742c'],['クリーム','#fff0bc'],['レモン','#eff78b'],['ふかみどり','#28664e'],['ミント','#a5e0c6'],['ターコイズ','#3babae'],['こんいろ','#344e80'],['ラベンダー','#d0bdec'],['ももいろ','#ffd0ce'],['ベージュ','#d9bf9d'],['くろ','#3c3c3c']];
 let selected=colors[0],history=[],state={},storageOK=true;
 const group=document.querySelector('#parts'),status=document.querySelector('#status'),undo=document.querySelector('#undo');
-try{const value=JSON.parse(localStorage.getItem(KEY)||'{}');if(value&&typeof value==='object'&&!Array.isArray(value))state=value}catch(e){storageOK=false}
-function persist(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){storageOK=false}if(!storageOK)status.textContent='この環境では途中保存できません。「作品を保存」をご利用ください。'}
+try{const value=JSON.parse(localStorage.getItem(current==='flower'?KEY:'digital-nurie-'+current+'-v1')||'{}');if(value&&typeof value==='object'&&!Array.isArray(value))state=value}catch(e){storageOK=false}
+function persist(){try{localStorage.setItem(current==='flower'?KEY:'digital-nurie-'+current+'-v1',JSON.stringify(state))}catch(e){storageOK=false}if(!storageOK)status.textContent='この環境では途中保存できません。「作品を保存」をご利用ください。'}
 function add(tag,id,label,attrs){const el=document.createElementNS(NS,tag);Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,v));el.id=id;el.dataset.label=label;el.setAttribute('class','part');el.setAttribute('role','button');el.setAttribute('tabindex','0');const saved=state[id];el.setAttribute('fill',typeof saved==='string'&&/^#[0-9a-f]{6}$/i.test(saved)?saved:'#ffffff');el.setAttribute('aria-label',label+'をぬる');el.addEventListener('click',()=>paint(el));el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();paint(el)}});group.append(el)}
-// 茎・葉・花びら・中心は、すべて独立した塗り区画。
+
+// 和柄はすべて閉じたSVG区画。背景画像ではなく一つずつ着色できる。
+function detail(tag,id,label,attrs){add(tag,id,label,{...attrs,style:'stroke-width:2;stroke-linecap:round;stroke-linejoin:round'})}
+function point(x,y,r,a){return [x+r*Math.cos(a*Math.PI/180),y+r*Math.sin(a*Math.PI/180)]}
+function fan(id,x,y,r,start,end,n){
+ for(let i=0;i<n;i++){const a=start+(end-start)*i/n,b=start+(end-start)*(i+1)/n,A=point(x,y,r,a),B=point(x,y,r,b);detail('path',id+'-fold'+i,'扇の区画'+(i+1),{d:`M${x} ${y} L${A} A${r} ${r} 0 0 1 ${B} Z`})}
+ // 内側の折り目は細い線のみで、色のつく面を覆わない。
+ detail('circle',id+'-pivot','扇のかなめ',{cx:x,cy:y,r:9});
+}
+function mum(id,x,y,r,count=12){
+ for(let ring=0;ring<2;ring++){const size=ring===0?r:r*.62,cy=y-size*.52;for(let i=0;i<count;i++){detail('ellipse',id+'-r'+ring+'-p'+i,'菊の花びら'+(ring*count+i+1),{cx:x,cy,rx:size*.18,ry:size*.50,transform:`rotate(${360*i/count+ring*15} ${x} ${y})`})}}
+ detail('circle',id+'-center','菊の花の中心',{cx:x,cy:y,r:r*.17});
+}
+function blossom(id,x,y,r){
+ for(let i=0;i<5;i++)detail('path',id+'-petal'+i,'小花の花びら'+(i+1),{d:`M${x} ${y} C${x-r*.9} ${y-r*.45} ${x-r*.65} ${y-r*1.3} ${x} ${y-r*.82} C${x+r*.65} ${y-r*1.3} ${x+r*.9} ${y-r*.45} ${x} ${y}Z`,transform:`rotate(${i*72} ${x} ${y})`});detail('circle',id+'-middle','小花の中心',{cx:x,cy:y,r:r*.14});
+}
+function leaf(id,x,y,r,angle){
+ const t=`rotate(${angle} ${x} ${y})`;
+ detail('path',id+'-left','葉の左半分',{d:`M${x} ${y} Q${x-r*.8} ${y-r*.6} ${x} ${y-r*1.6} L${x} ${y}Z`,transform:t});
+ detail('path',id+'-right','葉の右半分',{d:`M${x} ${y} Q${x+r*.8} ${y-r*.6} ${x} ${y-r*1.6} L${x} ${y}Z`,transform:t});
+}
+function temari(id,x,y,r){
+ detail('circle',id+'-base','手まりの地色',{cx:x,cy:y,r});
+ for(let i=0;i<8;i++)detail('path',id+'-petal'+i,'手まりの花模様'+(i+1),{d:`M${x} ${y} Q${x-r*.46} ${y-r*.60} ${x} ${y-r*.94} Q${x+r*.46} ${y-r*.60} ${x} ${y}Z`,transform:`rotate(${i*45} ${x} ${y})`});
+ for(let i=0;i<8;i++){const [cx,cy]=point(x,y,r*.72,22.5+i*45);detail('path',id+'-diamond'+i,'手まりのひし形'+(i+1),{d:`M${cx} ${cy-r*.13} L${cx+r*.10} ${cy} L${cx} ${cy+r*.13} L${cx-r*.10} ${cy}Z`})}
+ detail('circle',id+'-center','手まりの中心',{cx:x,cy:y,r:r*.10});
+}
+function butterfly(id,x,y,k){
+ for(const side of [-1,1]){const tx=`translate(${x} ${y}) scale(${side*k} ${k})`;
+ detail('path',id+'-upper'+side,'蝶の上の羽',{d:'M0 0 C25 -110 125 -130 100 -40 Q80 5 0 0Z',transform:tx});
+ detail('path',id+'-lower'+side,'蝶の下の羽',{d:'M0 0 Q125 -15 85 70 Q35 105 0 0Z',transform:tx});
+ detail('path',id+'-inner'+side,'蝶の羽模様',{d:'M10 -6 Q75 -100 82 -48 Q75 -20 10 -6Z',transform:tx});
+ [ [90,-70],[77,-32],[65,55] ].forEach(([cx,cy],i)=>detail('circle',id+'-spot'+side+'-'+i,'蝶の丸い模様',{cx,cy,r:7,transform:tx}));}
+ detail('ellipse',id+'-body','蝶のからだ',{cx:x,cy:y,rx:5*k,ry:42*k});
+}
+const drawings=[
+ ['flower','お花',()=>{
+ // 茎・葉・花びら・中心は、すべて独立した塗り区画。
 add('path','stem','くき',{d:'M335 330 Q330 480 341 653 L364 653 Q352 480 367 330 Z'});
 add('path','leaf-left','左の葉っぱ',{d:'M345 543 C240 553 170 479 158 423 C248 413 321 452 345 543 Z'});
 add('path','leaf-right','右の葉っぱ',{d:'M356 594 C455 603 524 533 539 474 C449 461 379 502 356 594 Z'});
 for(let i=0;i<8;i++)add('ellipse','petal-'+i,'花びら'+(i+1),{cx:350,cy:171,rx:57,ry:104,transform:'rotate('+(i*45)+' 350 300)'});
 add('circle','center','花のまんなか',{cx:350,cy:300,r:72});
+
+ }],
+ ['tulip','チューリップ',()=>{
+  [210,490].forEach((x,i)=>{add('rect','stem'+i,'茎'+(i+1),{x:x-12,y:300,width:24,height:330,rx:10});add('path','leaf'+i,'葉'+(i+1),{d:`M${x} 565 Q${x-150} 550 ${x-130} 420 Q${x-10} 435 ${x} 565 Z`});add('path','bloom'+i,'花'+(i+1),{d:`M${x-100} 200 L${x-50} 250 L${x} 170 L${x+50} 250 L${x+100} 200 L${x+90} 320 Q${x} 430 ${x-90} 320 Z`})})
+ }],
+ ['butterfly','ちょうちょ',()=>{
+  add('path','wing-lt','左の上の羽',{d:'M335 350 C70 340 65 70 240 130 Q335 165 335 350Z'});add('path','wing-rt','右の上の羽',{d:'M365 350 C630 340 635 70 460 130 Q365 165 365 350Z'});add('path','wing-lb','左の下の羽',{d:'M335 350 C100 320 125 625 270 570 Q340 540 335 350Z'});add('path','wing-rb','右の下の羽',{d:'M365 350 C600 320 575 625 430 570 Q360 540 365 350Z'});
+  [[220,240],[480,240],[235,465],[465,465]].forEach(([cx,cy],i)=>add('ellipse','spot'+i,'羽の模様'+(i+1),{cx,cy,rx:45,ry:60}));add('rect','body','からだ',{x:328,y:270,width:44,height:300,rx:22});add('circle','head','頭',{cx:350,cy:245,r:37})
+ }],
+ ['fish','お魚',()=>{
+  add('path','tail','尾びれ',{d:'M465 350 L620 230 L620 490 Z'});add('path','topfin','背びれ',{d:'M240 265 Q290 100 410 250Z'});add('ellipse','body','からだ',{cx:320,cy:360,rx:200,ry:135});add('path','stripe1','模様1',{d:'M260 232 Q210 360 260 488 L315 495 Q265 360 315 225Z'});add('path','stripe2','模様2',{d:'M360 228 Q310 360 360 492 L415 479 Q365 360 415 242Z'});add('path','fin','胸びれ',{d:'M330 380 Q450 360 420 455Z'});add('circle','eye','目',{cx:195,cy:330,r:22});[ [150,180,28],[110,100,18],[560,140,38] ].forEach(([cx,cy,r],i)=>add('circle','bubble'+i,'あわ'+(i+1),{cx,cy,r}))
+ }],
+ ['house','お家',()=>{
+  add('circle','sun','太陽',{cx:555,cy:130,r:65});add('rect','wall','壁',{x:160,y:300,width:380,height:310});add('path','roof','屋根',{d:'M110 310 L350 110 L590 310Z'});add('rect','door','ドア',{x:300,y:425,width:100,height:185,rx:8});add('circle','knob','ドアノブ',{cx:376,cy:525,r:10});[210,440].forEach((x,i)=>add('rect','window'+i,'窓'+(i+1),{x,y:365,width:65,height:90,rx:6}));add('path','ground','地面',{d:'M60 610 Q350 575 640 610 L640 670 L60 670Z'})
+ }],
+ ['fuji','富士山',()=>{
+  add('circle','sun','太陽',{cx:540,cy:145,r:65});add('path','mountain','富士山',{d:'M65 540 L290 210 L410 210 L635 540 Z'});add('path','snow','山の雪',{d:'M290 210 L410 210 L470 298 L415 282 L378 320 L340 281 L302 318 L235 291Z'});add('path','lake','湖',{d:'M65 540 L635 540 L635 640 Q350 690 65 640Z'});add('path','cloud','雲',{d:'M80 180 Q50 125 100 110 Q120 55 170 90 Q230 65 250 120 Q300 145 255 180Z'})
+ }],
+ ['fruit','くだもの',()=>{
+  add('path','apple','りんご',{d:'M230 260 C80 190 55 420 180 460 Q220 480 245 455 C370 495 415 230 290 250 Q260 265 230 260Z'});add('path','leaf','りんごの葉',{d:'M245 250 Q230 135 340 160 Q330 235 245 250Z'});add('ellipse','orange','みかん',{cx:485,cy:430,rx:120,ry:110});add('path','orange-leaf','みかんの葉',{d:'M480 325 Q460 245 550 265 Q560 315 480 325Z'});add('path','plate','お皿',{d:'M65 565 Q350 490 635 565 Q620 660 350 665 Q80 660 65 565Z'})
+ }],
+ ['mandala','花もよう',()=>{
+  for(let i=0;i<12;i++)add('ellipse','outer'+i,'外の花びら'+(i+1),{cx:350,cy:180,rx:50,ry:110,transform:`rotate(${i*30} 350 350)`});for(let i=0;i<8;i++)add('ellipse','inner'+i,'内の花びら'+(i+1),{cx:350,cy:270,rx:36,ry:70,transform:`rotate(${i*45} 350 350)`});add('circle','middle','まんなか',{cx:350,cy:350,r:48})
+ }],
+ ['sakura','桜',()=>{
+ for(let i=0;i<5;i++)add('path','petal'+i,'花びら'+(i+1),{d:'M350 350 C220 270 230 120 300 110 L350 145 L400 110 C470 120 480 270 350 350Z',transform:`rotate(${i*72} 350 350)`});add('circle','center','花の中心',{cx:350,cy:350,r:55})
+ }],
+ ['sunflower','ひまわり',()=>{
+ add('rect','stem','茎',{x:337,y:335,width:26,height:320});add('path','leaf','葉',{d:'M350 580 Q160 560 170 430 Q320 430 350 580Z'});for(let i=0;i<12;i++)add('ellipse','petal'+i,'花びら'+(i+1),{cx:350,cy:180,rx:40,ry:90,transform:`rotate(${i*30} 350 300)`});add('circle','center','中心',{cx:350,cy:300,r:105})
+ }],
+ ['umbrella','かさ',()=>{
+ add('path','handle','持ち手',{d:'M335 340 L365 340 L365 575 Q365 660 280 650 Q225 640 230 585 L260 585 Q260 625 300 620 Q335 620 335 575Z'});add('path','left','かさ左',{d:'M350 135 Q160 160 70 390 Q135 345 205 390 Q210 225 350 135Z'});add('path','middle','かさ中央',{d:'M350 135 Q210 225 205 390 Q350 340 495 390 Q490 225 350 135Z'});add('path','right','かさ右',{d:'M350 135 Q540 160 630 390 Q565 345 495 390 Q490 225 350 135Z'});[[100,500],[535,540],[450,610]].forEach(([x,y],i)=>add('path','drop'+i,'しずく'+(i+1),{d:`M${x} ${y-50} Q${x-60} ${y+35} ${x} ${y+40} Q${x+60} ${y+35} ${x} ${y-50}Z`}))
+ }],
+ ['balloon','風船',()=>{
+ [180,350,520].forEach((x,i)=>{add('path','string'+i,'ひも'+(i+1),{d:`M${x-5} 350 L${x+5} 350 L${355+i*10} 645 L${345+i*10} 645Z`});add('ellipse','balloon'+i,'風船'+(i+1),{cx:x,cy:250+(i===1?-65:0),rx:85,ry:115})})
+ }],
+ ['tea','お茶の時間',()=>{
+ add('ellipse','plate','お皿',{cx:330,cy:550,rx:235,ry:60});add('ellipse','handle','持ち手',{cx:505,cy:375,rx:75,ry:80});add('ellipse','hole','持ち手の内側',{cx:505,cy:375,rx:36,ry:42});add('path','cup','カップ',{d:'M150 290 L490 290 L460 485 Q320 590 180 485Z'});add('ellipse','rim','飲みもの',{cx:320,cy:290,rx:170,ry:42});add('path','band','カップの模様',{d:'M166 385 L474 385 L465 435 L175 435Z'})
+ }],
+ ['cake','ケーキ',()=>{
+ add('ellipse','plate','お皿',{cx:350,cy:580,rx:270,ry:55});add('rect','cake','生地',{x:140,y:320,width:420,height:250,rx:20});add('path','cream','クリーム',{d:'M140 320 Q350 270 560 320 L560 400 Q525 450 490 400 Q455 450 420 400 Q385 450 350 400 Q315 450 280 400 Q245 450 210 400 Q175 450 140 400Z'});[230,350,470].forEach((x,i)=>add('path','berry'+i,'いちご'+(i+1),{d:`M${x-40} 300 Q${x-60} 210 ${x} 210 Q${x+60} 210 ${x+40} 300Z`}))
+ }],
+ ['owl','ふくろう',()=>{
+ add('path','branch','枝',{d:'M85 590 L615 590 L615 625 L85 625Z'});add('path','body','からだ',{d:'M190 200 L185 100 L280 175 Q350 145 420 175 L515 100 L510 200 Q590 580 350 600 Q110 580 190 200Z'});add('ellipse','belly','おなか',{cx:350,cy:445,rx:115,ry:130});[265,435].forEach((cx,i)=>{add('circle','face'+i,'目のまわり'+(i+1),{cx,cy:290,r:75});add('circle','eye'+i,'目'+(i+1),{cx,cy:290,r:28})});add('path','beak','くちばし',{d:'M315 335 L385 335 L350 390Z'})
+ }],
+ ['turtle','かめ',()=>{
+ add('ellipse','head','頭',{cx:565,cy:310,rx:68,ry:55});[[210,220],[210,500],[460,220],[460,500]].forEach(([cx,cy],i)=>add('ellipse','leg'+i,'足'+(i+1),{cx,cy,rx:45,ry:60}));add('ellipse','shell','こうら',{cx:335,cy:360,rx:205,ry:170});add('path','middle','こうら中央',{d:'M280 280 L390 280 L440 360 L390 440 L280 440 L230 360Z'});add('path','top','こうら上',{d:'M280 280 L250 205 Q335 175 420 205 L390 280Z'});add('path','bottom','こうら下',{d:'M280 440 L250 515 Q335 545 420 515 L390 440Z'});add('circle','eye','目',{cx:580,cy:295,r:12})
+ }],
+ ['sailboat','帆船',()=>{
+ add('path','sea','海',{d:'M60 520 Q130 480 200 520 Q270 480 340 520 Q410 480 480 520 Q550 480 640 520 L640 655 L60 655Z'});add('rect','mast','マスト',{x:338,y:130,width:24,height:400});add('path','leftsail','左の帆',{d:'M325 160 L125 445 L325 445Z'});add('path','rightsail','右の帆',{d:'M375 210 L575 445 L375 445Z'});add('path','boat','船体',{d:'M110 480 L600 480 L525 580 L195 580Z'});add('circle','sun','太陽',{cx:550,cy:140,r:55})
+ }],
+ ['train','電車',()=>{
+ add('rect','body','車体',{x:85,y:240,width:530,height:290,rx:35});add('rect','stripe','車体の帯',{x:85,y:420,width:530,height:55});[135,265,395].forEach((x,i)=>add('rect','window'+i,'窓'+(i+1),{x,y:280,width:90,height:100,rx:10}));add('rect','door','ドア',{x:520,y:280,width:60,height:220,rx:8});[185,515].forEach((cx,i)=>add('circle','wheel'+i,'車輪'+(i+1),{cx,cy:550,r:50}));add('rect','track','線路',{x:55,y:605,width:590,height:25})
+ }],
+ ['leaves','もみじ',()=>{
+ add('path','stem','葉のくき',{d:'M340 410 L365 410 L380 650 L355 650Z'});for(let i=0;i<5;i++)add('path','leaf'+i,'葉の部分'+(i+1),{d:'M350 440 L285 290 L305 265 L285 115 L350 170 L415 115 L395 265 L415 290Z',transform:`rotate(${(i-2)*48} 350 440)`})
+ }],
+ ['snowman','雪だるま',()=>{
+ add('circle','body','からだ',{cx:350,cy:480,r:145});add('circle','head','顔',{cx:350,cy:270,r:110});add('rect','hat','帽子',{x:270,y:80,width:160,height:110,rx:12});add('rect','brim','帽子のつば',{x:235,y:170,width:230,height:30,rx:10});add('rect','scarf','マフラー',{x:235,y:355,width:230,height:45,rx:18});add('rect','scarfend','マフラーの先',{x:400,y:390,width:45,height:130,rx:12});add('path','nose','鼻',{d:'M340 270 L415 290 L340 310Z'});[310,390].forEach((cx,i)=>add('circle','eye'+i,'目'+(i+1),{cx,cy:245,r:12}));[450,520].forEach((cy,i)=>add('circle','button'+i,'ボタン'+(i+1),{cx:340,cy,r:16}))
+ }]
+,
+ ['wa-temari','和柄・扇と手まり',()=>{
+ fan('fan',345,340,285,-163,-15,14);
+ // 組み紐は見やすい幅の閉じた領域。
+ detail('path','cord','手まりの組み紐',{d:'M220 490 C490 470 510 600 370 596 C270 594 350 665 520 637 L522 644 C335 679 255 585 370 588 C500 591 482 481 220 498Z'});
+ temari('ball-a',430,390,127);temari('ball-b',227,500,110);
+ [[169,256,40,-65],[217,328,38,-85],[505,505,35,65],[107,560,32,-70],[317,570,30,45]].forEach(([x,y,r,a],i)=>leaf('leaf'+i,x,y,r,a));
+ [[228,247,58],[183,335,67],[305,349,45],[420,510,57],[177,606,57],[125,277,33]].forEach(([x,y,r],i)=>mum('mum'+i,x,y,r,12));
+ butterfly('butterfly',393,200,.75);
+ }],
+ ['wa-fans','和柄・重ね扇と花',()=>{
+ detail('rect','background','背景',{x:26,y:26,width:648,height:668,rx:3});
+ fan('upper',158,287,248,-122,-1,13);
+ fan('middle',553,430,258,-174,-52,13);
+ fan('lower',287,653,242,-169,-17,14);
+ // 下辺の流水。帯ごとに色を変えられる。
+ for(let i=0;i<4;i++){const y=545+i*26;detail('path','wave'+i,'流水の帯'+(i+1),{d:`M27 ${y} Q165 ${y-65} 320 ${y} T673 ${y} L673 ${y+22} Q475 ${y-42} 320 ${y+22} T27 ${y+22}Z`})}
+ [[142,197,33,-40],[275,240,35,60],[511,300,45,70],[420,468,40,40],[188,465,37,-60],[574,568,40,50]].forEach(([x,y,r,a],i)=>leaf('foliage'+i,x,y,r,a));
+ [[186,178,53],[262,202,44],[339,172,50],[399,233,36],[519,374,52],[467,443,48],[214,455,46],[134,499,42]].forEach(([x,y,r],i)=>mum('chrysanthemum'+i,x,y,r,12));
+ // 紫陽花の小花を密に配置。
+ [[424,525],[455,517],[486,531],[404,551],[439,551],[473,560],[503,560],[417,582],[452,586],[484,591]].forEach(([x,y],i)=>blossom('hydrangea'+i,x,y,24));
+ [[91,87,23],[546,130,29],[588,166,25],[125,378,26],[599,470,23],[94,614,23],[591,639,28]].forEach(([x,y,r],i)=>blossom('flower'+i,x,y,r));
+ }]
+
+];
+function loadDrawing(id){current=id;state={};history=[];storageOK=true;try{const v=JSON.parse(localStorage.getItem(current==='flower'?KEY:'digital-nurie-'+current+'-v1')||'{}');if(v&&typeof v==='object'&&!Array.isArray(v))state=v}catch(e){storageOK=false}group.replaceChildren();const drawing=drawings.find(d=>d[0]===id);drawing[2]();resetZoom();undo.disabled=true;document.querySelector('h1').textContent=drawing[1]+'のぬりえ';document.querySelector('#art').setAttribute('aria-label',drawing[1]+'のぬりえ');document.querySelector('.paper').setAttribute('aria-label',drawing[1]+'のぬりえ');document.querySelectorAll('.choice').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.id===id)));status.textContent='色をえらんで、ぬりたいところを押してください。'}
 function paint(el){const before=el.getAttribute('fill');if(before===selected[1])return;history.push({...state});state[el.id]=selected[1];el.setAttribute('fill',selected[1]);undo.disabled=false;status.textContent=el.dataset.label+'を'+selected[0]+'にぬりました。';persist()}
-function render(){document.querySelectorAll('.part').forEach(el=>{const v=state[el.id];el.setAttribute('fill',typeof v==='string'&&/^#[0-9a-f]{6}$/i.test(v)?v:'#ffffff')});undo.disabled=!history.length}
+function render(){group.querySelectorAll('.part').forEach(el=>{const v=state[el.id];el.setAttribute('fill',typeof v==='string'&&/^#[0-9a-f]{6}$/i.test(v)?v:'#ffffff')});undo.disabled=!history.length}
 colors.forEach(color=>{const b=document.createElement('button');b.className='swatch';b.style.background=color[1];b.setAttribute('aria-label',color[0]);b.title=color[0];b.setAttribute('aria-pressed',String(color===selected));b.onclick=()=>{selected=color;document.querySelectorAll('.swatch').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));document.querySelector('#colorLabel').textContent='いまの色：'+color[0]};document.querySelector('#palette').append(b)});
 undo.onclick=()=>{if(!history.length)return;state=history.pop();render();status.textContent='ひとつ前にもどしました。';persist()};
 const dialog=document.querySelector('#confirm');document.querySelector('#reset').onclick=()=>dialog.showModal();document.querySelector('#cancel').onclick=()=>dialog.close();document.querySelector('#clear').onclick=()=>{history.push({...state});state={};render();persist();dialog.close();status.textContent='白にもどしました。好きな色で始めましょう。'};
-document.querySelector('#save').onclick=()=>{const svg=document.querySelector('#art').cloneNode(true);svg.setAttribute('width','1400');svg.setAttribute('height','1440');const bg=document.createElementNS(NS,'rect');bg.setAttribute('width','700');bg.setAttribute('height','720');bg.setAttribute('fill','white');svg.insertBefore(bg,svg.firstChild);svg.querySelectorAll('.part').forEach(el=>{el.setAttribute('stroke','#35443e');el.setAttribute('stroke-width','4');el.removeAttribute('tabindex')});const blob=new Blob([new XMLSerializer().serializeToString(svg)],{type:'image/svg+xml;charset=utf-8'}),url=URL.createObjectURL(blob),img=new Image();img.onload=()=>{const canvas=document.createElement('canvas');canvas.width=1400;canvas.height=1440;canvas.getContext('2d').drawImage(img,0,0);URL.revokeObjectURL(url);canvas.toBlob(png=>{if(!png){status.textContent='保存できませんでした。もう一度お試しください。';return}const link=document.createElement('a'),downloadURL=URL.createObjectURL(png);link.href=downloadURL;link.download='ohanano-nurie.png';document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(downloadURL),60000);status.textContent='作品の保存を開始しました。'},'image/png')};img.onerror=()=>{URL.revokeObjectURL(url);status.textContent='保存できませんでした。'};img.src=url};
+document.querySelector('#save').onclick=()=>{const svg=document.querySelector('#art').cloneNode(true);svg.setAttribute('viewBox','0 0 700 720');svg.setAttribute('width','1400');svg.setAttribute('height','1440');const bg=document.createElementNS(NS,'rect');bg.setAttribute('width','700');bg.setAttribute('height','720');bg.setAttribute('fill','white');svg.insertBefore(bg,svg.firstChild);svg.querySelectorAll('.part').forEach(el=>{el.setAttribute('stroke','#35443e');el.setAttribute('stroke-width','4');el.removeAttribute('tabindex')});const blob=new Blob([new XMLSerializer().serializeToString(svg)],{type:'image/svg+xml;charset=utf-8'}),url=URL.createObjectURL(blob),img=new Image();img.onload=()=>{const canvas=document.createElement('canvas');canvas.width=1400;canvas.height=1440;canvas.getContext('2d').drawImage(img,0,0);URL.revokeObjectURL(url);canvas.toBlob(png=>{if(!png){status.textContent='保存できませんでした。もう一度お試しください。';return}const link=document.createElement('a'),downloadURL=URL.createObjectURL(png);link.href=downloadURL;link.download='nurie-'+current+'.png';document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(downloadURL),60000);status.textContent='作品の保存を開始しました。'},'image/png')};img.onerror=()=>{URL.revokeObjectURL(url);status.textContent='保存できませんでした。'};img.src=url};
+
+let zoom=1,viewX=0,viewY=0;
+function updateZoom(){const w=700/zoom,h=720/zoom;viewX=Math.max(0,Math.min(700-w,viewX));viewY=Math.max(0,Math.min(720-h,viewY));document.querySelector('#art').setAttribute('viewBox',`${viewX} ${viewY} ${w} ${h}`);document.querySelector('#zoomLevel').textContent=Math.round(zoom*100)+'%';document.querySelector('#pan').hidden=zoom===1;document.querySelector('#zoomOut').disabled=zoom===1;document.querySelector('#zoomIn').disabled=zoom===4}
+function resetZoom(){zoom=1;viewX=0;viewY=0;updateZoom()}
+function changeZoom(next){const cx=viewX+350/zoom,cy=viewY+360/zoom;zoom=Math.max(1,Math.min(4,next));viewX=cx-350/zoom;viewY=cy-360/zoom;updateZoom()}
+ document.querySelector('#zoomIn').onclick=()=>changeZoom(zoom+.5);document.querySelector('#zoomOut').onclick=()=>changeZoom(zoom-.5);document.querySelector('#zoomReset').onclick=resetZoom;
+ document.querySelectorAll('[data-pan]').forEach(b=>b.onclick=()=>{const [dx,dy]=b.dataset.pan.split(',').map(Number);viewX+=dx*150/zoom;viewY+=dy*150/zoom;updateZoom()});
+drawings.forEach(([id,name,draw])=>{current=id;state={};group.replaceChildren();draw();const thumb=document.querySelector('#art').cloneNode(true);thumb.removeAttribute('id');thumb.setAttribute('viewBox','0 0 700 720');thumb.setAttribute('aria-hidden','true');thumb.querySelectorAll('[id]').forEach(e=>e.removeAttribute('id'));thumb.querySelectorAll('[tabindex]').forEach(e=>e.removeAttribute('tabindex'));const b=document.createElement('button');b.className='choice';b.dataset.id=id;b.setAttribute('aria-pressed','false');const label=document.createElement('span');label.textContent=name;b.append(thumb,label);b.onclick=()=>{loadDrawing(id);document.querySelector('#picker').open=false;document.querySelector('h1').scrollIntoView({block:'start'})};document.querySelector('#gallery').append(b)});loadDrawing('flower');
 if(!storageOK)status.textContent='途中保存が使えない環境です。「作品を保存」をご利用ください。';
 </script>
 </html>
